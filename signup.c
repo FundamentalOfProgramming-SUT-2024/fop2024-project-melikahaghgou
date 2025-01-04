@@ -3,9 +3,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <ncurses.h>
-#include"signup.h"
+#include "signup.h"
 
-#define minpasswordlength 7
+#define MIN_PASSWORD_LENGTH 7
 #define FILENAME "users.txt"
 
 int username_exists(const char *username) {
@@ -33,7 +33,7 @@ int is_valid_email(const char *email) {
 }
 
 int is_valid_password(const char *password) {
-    if (strlen(password) < minpasswordlength) return 0;
+    if (strlen(password) < MIN_PASSWORD_LENGTH) return 0;
 
     int has_digit = 0, has_upper = 0, has_lower = 0;
     for (int i = 0; password[i]; i++) {
@@ -44,54 +44,72 @@ int is_valid_password(const char *password) {
     return has_digit && has_upper && has_lower;
 }
 
+WINDOW *create_newwin_sign_up(int height, int width, int starty, int startx, const char *title) {
+    WINDOW *local_win = newwin(height, width, starty, startx);
+    box(local_win, 0, 0);
+    mvwprintw(local_win, 0, (width - strlen(title)) / 2, "%s", title);
+    wrefresh(local_win);
+    return local_win;
+}
+
 void create_user() {
     char username[50], password[50], email[100];
 
     initscr(); 
+    noecho();
     cbreak();  
+    start_color();
+    init_pair(1, COLOR_WHITE, COLOR_BLUE); // White text on blue background
+    init_pair(2, COLOR_BLACK, COLOR_MAGENTA); // Black text on pink background
+    int startx = (COLS - 50) / 2;
+    int starty = (LINES - 15) / 2;
+    WINDOW *signup_win = create_newwin_sign_up(15, 50, starty, startx, "Sign Up");
 
+    wattron(signup_win, COLOR_PAIR(1));
     while (1) {
-        printw("Enter username: ");
-        getstr(username);
+        mvwprintw(signup_win, 2, 1, "Enter username: ");
+        wrefresh(signup_win);
+        wgetstr(signup_win, username);
         if (!username_exists(username)) {
             break; 
         }
-        printw("Username already exists! Please enter a different username.\n");
+        mvwprintw(signup_win, 3, 1, "Username already exists! Please enter a different username.");
+        wrefresh(signup_win);
     }
 
     while (1) {
-        printw("Enter email: ");
-        getstr(email);
+        mvwprintw(signup_win, 4, 1, "Enter email: ");
+        wrefresh(signup_win);
+        wgetstr(signup_win, email);
         if (is_valid_email(email)) {
             break; 
         }
-        printw("Invalid email format! Please enter again (xxx@y.zzz).\n");
+        mvwprintw(signup_win, 5, 1, "Invalid email format! Please enter again (xxx@y.zzz).");
+        wrefresh(signup_win);
     }
 
     while (1) {
-        printw("Enter password: ");
-        getstr(password);
+        mvwprintw(signup_win, 6, 1, "Enter password: ");
+        wrefresh(signup_win);
+        wgetstr(signup_win, password);
         if (is_valid_password(password)) {
             break; 
         }
-        printw("Password must be at least 7 characters long, contain a digit, an uppercase and a lowercase letter.\n");
+        mvwprintw(signup_win, 7, 1, "Password must be at least 7 characters long, contain a digit, an uppercase and a lowercase letter.");
+        wrefresh(signup_win);
     }
 
     FILE *file = fopen(FILENAME, "a");
     if (file) {
         fprintf(file, "%s %s %s\n", username, password, email);
         fclose(file);
-        printw("User created successfully!\n");
+        mvwprintw(signup_win, 8, 1, "User created successfully!");
     } else {
-        printw("Error saving user data!\n");
+        mvwprintw(signup_win, 8, 1, "Error saving user data!");
     }
 
-    refresh();
-    getch();   
+    wrefresh(signup_win);
+    wgetch(signup_win);   
+    delwin(signup_win);  
     endwin();  
 }
-
-// int main() {
-//     create_user();
-//     return 0;
-// }

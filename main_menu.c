@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <string.h>
-#include"menu.h"
+#include "main_menu.h"
+
 #define MENU_WIDTH 40
 #define MENU_HEIGHT 10
 
@@ -13,20 +14,18 @@ WINDOW *create_newwin_for_menu(int height, int width, int starty, int startx, co
     return local_win;
 }
 
-char main_menu() {
+const char *main_menu() {
     initscr(); // Initialize ncurses
     cbreak(); // Disable line buffering
     noecho(); // Turn off echoing of characters
-    keypad(stdscr, TRUE); // Enable arrow keys
-
     start_color();
     init_pair(1, COLOR_WHITE, COLOR_BLUE); // White text on blue background
     init_pair(2, COLOR_BLACK, COLOR_MAGENTA); // Black text on pink background
 
     int startx = (COLS - MENU_WIDTH) / 2;
     int starty = (LINES - MENU_HEIGHT) / 2;
-    WINDOW *menu_win = create_newwin(MENU_HEIGHT, MENU_WIDTH, starty, startx, "Main Menu");
-
+    WINDOW *menu_win = create_newwin_for_menu(MENU_HEIGHT, MENU_WIDTH, starty, startx, "Main Menu");
+    keypad(menu_win, TRUE);
     char *choices[] = {"Login", "Sign Up", "Settings", "Exit"};
     int n_choices = sizeof(choices) / sizeof(char *);
     int highlight = 0;
@@ -39,6 +38,7 @@ char main_menu() {
                 wattron(menu_win, COLOR_PAIR(1));
             mvwprintw(menu_win, i + 2, 1, "%s", choices[i]);
             wattroff(menu_win, A_REVERSE | COLOR_PAIR(2));
+            move(0, 0);
         }
         wrefresh(menu_win);
 
@@ -61,5 +61,5 @@ char main_menu() {
 
     delwin(menu_win);
     endwin(); // End ncurses
-    return 0;
+    return "Exit";
 }

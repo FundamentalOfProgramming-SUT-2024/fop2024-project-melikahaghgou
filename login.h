@@ -1,7 +1,7 @@
 #ifndef LOGIN_H
-     #define LOGIN_H
+#define LOGIN_H
 
-     void login(); // تابعی برای ورود
+void login();
 void clear_screen();
 bool signup(const char *username, const char *password);
 bool authenticate_user(const char *username, const char *password);

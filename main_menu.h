@@ -1,11 +1,7 @@
-#ifndef LOGIN_H
-     #define LOGIN_H
+#ifndef MAIN_MENU_H
+#define MAIN_MENU_H
 
 WINDOW *create_newwin_for_menu(int height, int width, int starty, int startx, const char *title);
-char main_menu();
+const char *main_menu();
 
-
-
-
-
-     #endif
+#endif
