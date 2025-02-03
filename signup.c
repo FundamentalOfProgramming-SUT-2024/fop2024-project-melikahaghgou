@@ -59,8 +59,8 @@ void create_user() {
     noecho();
     cbreak();  
     start_color();
-    init_pair(1, COLOR_WHITE, COLOR_BLUE); // White text on blue background
-    init_pair(2, COLOR_BLACK, COLOR_MAGENTA); // Black text on pink background
+    init_pair(1, COLOR_WHITE, COLOR_BLUE); 
+    init_pair(2, COLOR_BLACK, COLOR_MAGENTA); 
     int startx = (COLS - 50) / 2;
     int starty = (LINES - 15) / 2;
     WINDOW *signup_win = create_newwin_sign_up(15, 50, starty, startx, "Sign Up");

@@ -14,9 +14,9 @@ void move_character();
 #include <stdlib.h>
 #include <time.h>
 
-char map[200][200];
-char color_map[200][200];
-int room_positions[6][4]; // Stores the top, left, bottom, right of each room
+char map[200][200]; //map characters
+char color_map[200][200]; //map colorpair numbers
+int room_positions[6][4]; 
 
 int hunger = 10;
 
@@ -26,50 +26,49 @@ void generate_map() {
 
     srand(time(NULL));
 
-    // Initialize the map array to empty spaces
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             map[i][j] = ' ';
         }
     }
 
-    // Divide screen into 6 sections
+    //divide screen into 6 sections
     int sections = 6;
     int section_height = height / 2;
     int section_width = width / 3;
 
-    // To store center points of rooms
+    //center points of rooms
     int centers[6][2];
 
     for (int i = 0; i < sections; ++i) {
         int row = (i / 3) * section_height + 5;
         int col = (i % 3) * section_width;
 
-        // Generate random dimensions for the room
+        //random dimensions for the room
         int room_height = (rand() % (section_height / 3 - 2)) + 6;
         int room_width = (rand() % (section_width / 2 - 2)) + 6;
 
-        // Ensure room fits within section
+        //ensure room fits within section
         if (room_height > section_height - 1) room_height = section_height - 1;
         if (room_width > section_width - 1) room_width = section_width - 1;
 
-        // Draw top and bottom borders
+        //draw top and bottom borders
         for (int j = 0; j < room_width; ++j) {
-            mvaddch(row, col + j, '-');
-            map[row][col + j] = '-';
-            mvaddch(row + room_height - 1, col + j, '-');
+            mvaddch(row, col + j, '-'); //prints top border
+            map[row][col + j] = '-'; //saves top border
+            mvaddch(row + room_height - 1, col + j, '-'); //bottom border
             map[row + room_height - 1][col + j] = '-';
         }
 
-        // Draw left and right borders
+        //draw left and right borders
         for (int j = 0; j < room_height; ++j) {
-            mvaddch(row + j, col, '|');
-            map[row + j][col] = '|';
+            mvaddch(row + j, col, '|');//print left border
+            map[row + j][col] = '|';//save left border
             mvaddch(row + j, col + room_width - 1, '|');
             map[row + j][col + room_width - 1] = '|';
         }
 
-        // Fill the room with points
+        //fill the room with points
         for (int j = 1; j < room_height - 1; j++) {
             for (int k = 1; k < room_width - 1; k++) {
                 mvaddch(row + j, k + col, '.');
@@ -77,27 +76,27 @@ void generate_map() {
             }
         }
 
-        // Store center points of the room
+        //store center points of the room
         int center_row = row + room_height / 2;
         int center_col = col + room_width / 2;
         centers[i][0] = center_row;
         centers[i][1] = center_col;
 
-        // Store room positions
-        room_positions[i][0] = row; // top
-        room_positions[i][1] = col; // left
-        room_positions[i][2] = row + room_height - 1; // bottom
-        room_positions[i][3] = col + room_width - 1; // right
+        //store room positions
+        room_positions[i][0] = row; //top
+        room_positions[i][1] = col; //left
+        room_positions[i][2] = row + room_height - 1; //bottom
+        room_positions[i][3] = col + room_width - 1; //right
     }
 
-    // Connect rooms with corridors and add branches
+    //connect rooms with corridors and add branches
     for (int i = 0; i < sections - 1; ++i) {
-        int start_row = centers[i][0];
-        int start_col = centers[i][1];
+        int start_row = centers[i][0]; //y
+        int start_col = centers[i][1]; //x
         int end_row = centers[i + 1][0];
         int end_col = centers[i + 1][1];
 
-        // Adjust start and end positions to avoid crossing through rooms
+        //adjust start and end positions to avoid crossing through rooms
         if (start_row > room_positions[i][2]) {
             start_row = room_positions[i][2] + 1;
         } else if (start_row < room_positions[i][0]) {
@@ -122,7 +121,7 @@ void generate_map() {
             end_col = room_positions[i + 1][1] - 1;
         }
 
-        // Draw horizontal corridor with doors
+        //draw horizontal corridor with doors
         for (int j = start_col; j != end_col; j += (start_col < end_col ? 1 : -1)) {
             if (mvwinch(stdscr, start_row, j) != '.') {
                 if (mvwinch(stdscr, start_row, j) == '|') {
@@ -134,7 +133,7 @@ void generate_map() {
                 }
             }
         }
-        // Draw vertical corridor with doors
+        //draw vertical corridor with doors
         for (int j = start_row; j != end_row; j += (start_row < end_row ? 1 : -1)) {
             if (mvwinch(stdscr, j, end_col) != '.') {
                 if (mvwinch(stdscr, j, end_col) == '-') {
@@ -147,12 +146,12 @@ void generate_map() {
             }
         }
 
-        // Add branches to the corridors
-        if (i % 2 == 0) { // Add a branch for every other corridor
+        //add branches to the corridors
+        if (i % 2 == 0) { //add a branch for some corridors
             int branch_length = rand() % 5 + 2;
-            int branch_dir = rand() % 2; // 0 for horizontal, 1 for vertical
+            int branch_dir = rand() % 2; //0 for horizontal, 1 for vertical
 
-            if (branch_dir == 0) { // Horizontal branch
+            if (branch_dir == 0) { //horizontal branch
                 int branch_row = (start_row + end_row) / 2;
                 int branch_col_start = (start_col + end_col) / 2;
                 int branch_col_end = branch_col_start + branch_length * ((rand() % 2) * 2 - 1);
@@ -161,7 +160,7 @@ void generate_map() {
                     mvaddch(branch_row, j, '#');
                     map[branch_row][j] = '#';
                 }
-            } else { // Vertical branch
+            } else { //vertical branch
                 int branch_col = (start_col + end_col) / 2;
                 int branch_row_start = (start_row + end_row) / 2;
                 int branch_row_end = branch_row_start + branch_length * ((rand() % 2) * 2 - 1);
@@ -174,7 +173,7 @@ void generate_map() {
         }
     }
 
-    // Store map data
+    //store map data
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             map[i][j] = mvwinch(stdscr, i, j);
@@ -207,9 +206,10 @@ void continue_corridor(int y, int x, int a){
 }
 
 void show_room(int y, int x) {
-// Find which room the character is in
+//find which room the character is in
     for (int i = 0; i < 6; ++i) {
         if (y >= room_positions[i][0] && y <= room_positions[i][2] && x >= room_positions[i][1] && x <= room_positions[i][3]) {
+            //print the room
             for (int row = room_positions[i][0]; row <= room_positions[i][2]; ++row) {
                 for (int col = room_positions[i][1]; col <= room_positions[i][3]; ++col) {
                     attron(COLOR_PAIR(color_map[row][col]));
@@ -224,18 +224,20 @@ void show_room(int y, int x) {
 }
 
 void create_gold(){
-    srand(time(NULL));
+    //random total number of golds between 10 to 20
     int total_gold = rand() % 11 + 20;
+    //divide by 6 for each room
     int gold_per_room = total_gold / 6;
 
     for (int i = 0; i < 6; ++i) {
         int current_gold = 0;
-        while(current_gold < gold_per_room){
+        while (current_gold < gold_per_room) {
             int x_random = room_positions[i][1] + rand() % (room_positions[i][3] - room_positions[i][1] - 1) + 1;
             int y_random = room_positions[i][0] + rand() % (room_positions[i][2] - room_positions[i][0] - 1) + 1;
-
-            if(map[y_random][x_random] == '.'){
-                if(rand() % 10 > 0){
+            //check if there is nothing else in the cell
+            if (map[y_random][x_random] == '.') {
+                //choose random type
+                if (rand() % 10 > 0) {
                     map[y_random][x_random] = '*';
                     color_map[y_random][x_random] = 10;
                 }
@@ -282,16 +284,16 @@ void create_weapon(){
             if(map[y_random][x_random] == '.'){
                 int rand_weapon = rand() % 4;
                 if(rand_weapon == 0){
-                    map[y_random][x_random] = 'd';
+                    map[y_random][x_random] = 'd'; //dagger
                 }
                 if(rand_weapon == 1){
-                    map[y_random][x_random] = 'm';
+                    map[y_random][x_random] = 'm'; //magic wand
                 }
                 if(rand_weapon == 2){
-                    map[y_random][x_random] = 'n';
+                    map[y_random][x_random] = 'n'; //normal arrow
                 }
                 if(rand_weapon == 3){
-                    map[y_random][x_random] = 's';
+                    map[y_random][x_random] = 's'; //sword
                 }
                 color_map[y_random][x_random] = 12;
                 current_weapon++;
@@ -312,13 +314,13 @@ void create_spell(){
             if(map[y_random][x_random] == '.'){
                 int rand_spell = rand() % 4;
                 if(rand_spell == 0){
-                    map[y_random][x_random] = '!';
+                    map[y_random][x_random] = '!'; //health spell
                 }
                 if(rand_spell == 1){
-                    map[y_random][x_random] = '~';
+                    map[y_random][x_random] = '~'; //speed spell
                 }
                 if(rand_spell == 2){
-                    map[y_random][x_random] = '%';
+                    map[y_random][x_random] = '%'; //damage spell
                 }
                 color_map[y_random][x_random] = 12;
                 current_spell++;
@@ -332,7 +334,7 @@ void create_enemy(){
     int enemy_per_room = 1;
     char enemies[5] = "DFGSU";
     for (int i = 0; i < 6; ++i) {
-        while(1){
+        while(1){ //one in each room
             int x_random = room_positions[i][1] + rand() % (room_positions[i][3] - room_positions[i][1] - 1) + 1;
             int y_random = room_positions[i][0] + rand() % (room_positions[i][2] - room_positions[i][0] - 1) + 1;
             if(map[y_random][x_random] == '.'){
@@ -538,7 +540,7 @@ void weapon_menu() {
     refresh();
 }
 
-int isValidMove(char cell) {
+int is_valid(char cell) {
     if(cell == '@'){
         mvprintw(0, 0, "Enter Password: ");
         int temp, count = 0;
@@ -549,29 +551,29 @@ int isValidMove(char cell) {
             if(temp == password){
                 mvprintw(2, 0, "Correct");
                 getch();
-                mvprintw(2, 0, "       ");
-                mvprintw(0, 16, "    ");
-                move(0, 16);
+                mvprintw(2, 0, "       ");//clear correct
+                mvprintw(0, 16, "    ");//clear enter password
+                break;
             }
             else{
                 if(count == 0){
-                    attron(COLOR_PAIR(17));
+                    attron(COLOR_PAIR(17));//yellow
                 }
                 if(count == 1){
-                    attron(COLOR_PAIR(16));
+                    attron(COLOR_PAIR(16));//orange
                 }
                 if(count == 2){
-                    attron(COLOR_PAIR(15));
+                    attron(COLOR_PAIR(15));//red
                 }
                 mvprintw(2, 0, "Wrong");
                 attroff(COLOR_PAIR(17));
                 attroff(COLOR_PAIR(15));
                 attroff(COLOR_PAIR(16));
                 getch();
-                mvprintw(2, 0, "     ");
+                mvprintw(2, 0, "     "); //clear wrong
                 count++;
-                mvprintw(0, 16, "    ");
-                move(0, 16);
+                mvprintw(0, 16, "    "); //clear password
+                move(0, 16); //move cursor to enter password
             }
         }
         getch();
@@ -583,7 +585,7 @@ int password = 0;
 
 void move_character() {
     int ch;
-    int x = 5, y = 5;
+    int x = 6, y = 6;
     clear();
     mvaddch(y, x, '@');
     show_room(y, x);
@@ -599,88 +601,96 @@ void move_character() {
     keypad(stdscr, TRUE);
 
     while ((ch = getch()) != 'q') {
-        if (difftime(time(NULL), hunger_timer) >= 5) {
-            hunger--;
+        if (difftime(time(NULL), hunger_timer) >= 5) {//lose 1 hunger point every 5 seconds
+            if(hunger > 0){
+                hunger--;
+            }
             hunger_timer = time(NULL);
         }
         int x_previous = x, y_previous = y;
         
         switch (ch) {
-    case 'k':
-    case KEY_DOWN:
-        if (isValidMove(map[y + 1][x])) {
-            mvaddch(y, x, map[y][x]);
-            y++;
+            case 'k':
+            case KEY_DOWN:
+                if (is_valid(map[y + 1][x])) {
+                    mvaddch(y, x, map[y][x]);
+                    y++;
+                }
+                break;
+            case 'j':
+            case KEY_UP:
+                if (is_valid(map[y - 1][x])) {
+                    mvaddch(y, x, map[y][x]);
+                    y--;
+                }
+                break;
+            case 'h':
+            case KEY_LEFT:
+                if (is_valid(map[y][x - 1])) {
+                    mvaddch(y, x, map[y][x]);
+                    x--;
+                }
+                break;
+            case 'l':
+            case KEY_RIGHT:
+                if (is_valid(map[y][x + 1])) {
+                    mvaddch(y, x, map[y][x]);
+                    x++;
+                }
+                break;
+            case 'b'://bottom left
+                if (is_valid(map[y + 1][x - 1])) {
+                    mvaddch(y, x, map[y][x]);
+                    y++;
+                    x--;
+                }
+                break;
+            case 'n'://bottom right
+                if (is_valid(map[y + 1][x + 1])) {
+                    mvaddch(y, x, map[y][x]);
+                    y++;
+                    x++;
+                }
+                break;
+            case 'u'://top right
+                if (is_valid(map[y - 1][x + 1])) {
+                    mvaddch(y, x, map[y][x]);
+                    y--;
+                    x++;
+                }
+                break;
+            case 'y'://top left
+                if (is_valid(map[y - 1][x - 1])) {
+                    mvaddch(y, x, map[y][x]);
+                    y--;
+                    x--;
+                }
+                break;
+            case 'e':
+                food_menu();
+                break;
+            case 'i':
+                weapon_menu();
+                break;
+            case 'w':
+                if (weapon == 5) {//already put weapon in backpack
+                    mvprintw(0, 0, "You Already Have No Weapon.");
+                    getch();
+                    mvprintw(0, 0, "                           ");
+                } else {
+                    mvprintw(0, 0, "You Put %s Away.", weapon_names[weapon]);
+                    weapon = 5;//sets weapon to nothing
+                    getch();
+                    mvprintw(0, 0, "                           ");
+                }
+                break;
+            case 'z':
+                spell_menu();
+                break;
+            default:
+                break;
         }
-        break;
-    case 'j':
-    case KEY_UP:
-        if (isValidMove(map[y - 1][x])) {
-            mvaddch(y, x, map[y][x]);
-            y--;
-        }
-        break;
-    case 'h':
-    case KEY_LEFT:
-        if (isValidMove(map[y][x - 1])) {
-            mvaddch(y, x, map[y][x]);
-            x--;
-        }
-        break;
-    case 'l':
-    case KEY_RIGHT:
-        if (isValidMove(map[y][x + 1])) {
-            mvaddch(y, x, map[y][x]);
-            x++;
-        }
-        break;
-    case 'b':
-        if (isValidMove(map[y + 1][x - 1])) {
-            mvaddch(y, x, map[y][x]);
-            y++;
-            x--;
-        }
-        break;
-    case 'n':
-        if (isValidMove(map[y + 1][x + 1])) {
-            mvaddch(y, x, map[y][x]);
-            y++;
-            x++;
-        }
-        break;
-    case 'u':
-        if (isValidMove(map[y - 1][x + 1])) {
-            mvaddch(y, x, map[y][x]);
-            y--;
-            x++;
-        }
-        break;
-    case 'e':
-        food_menu();
-        break;
-    case 'i':
-        weapon_menu();
-        break;
-    case 'w':
-        if (weapon == 5) {
-            mvprintw(0, 0, "You Already Have No Weapon.");
-            getch();
-            mvprintw(0, 0, "                           ");
-        } else {
-            mvprintw(0, 0, "You Put %s Away.", weapon_names[weapon]);
-            weapon = 5;
-            getch();
-            mvprintw(0, 0, "                           ");
-        }
-        break;
-    case 'z':
-        spell_menu();
-        break;
-    default:
-        break;
-}
-
-
+        //picking up things:
         if(map[y_previous][x_previous] == '*'){
             gold++;
             map[y_previous][x_previous] = '.';
@@ -706,8 +716,8 @@ void move_character() {
             getch();
             mvprintw(0, 0, "                 ");
         }
-        if(map[y_previous][x_previous] == '&'){
-            password = rand() % 9000 + 1000;
+        if(map[y_previous][x_previous] == '&'){//password door button
+            password = rand() % 9000 + 1000;//random 4 digit password
             password_time = time(NULL);
             flag = 1;
             continue;
@@ -772,33 +782,33 @@ void move_character() {
         if(flag == 1 && difftime(time(NULL), password_time) <= 30){
             mvprintw(0, 0, "Password: %d", password);
         } else if (flag == 1 && difftime(time(NULL), password_time) > 30){
-            flag = 0;
+            flag = 0;//password will not be shown anymore
             mvprintw(0, 0, "                     ");
-            for (int i = 0; i <= 1; i++) {
+            for (int i = 0; i <= 1; i++) {//print full map
                 for (int j = 0; j <= 40; j++) {
                     mvaddch(i, j, map[i][j]);
                 }
             }
         }
         if(difftime(time(NULL), password_time) > 0 && difftime(time(NULL), password_time) <= 30){
-            mvprintw(1, 0, "Time: %.0f seconds", difftime(time(NULL), password_time));
+            mvprintw(1, 0, "Time: %f seconds", difftime(time(NULL), password_time));
         }
 
-        mvprintw(LINES - 1, 5, "Gold: %d", gold);
+        mvprintw(LINES - 1, 5, "Gold: %d", gold);//number of golds
 
-        mvprintw(LINES - 1, 20, "Hunger: ++++++++++");
-        move(LINES - 1, 28);
-        attron(COLOR_PAIR(14));
+        mvprintw(LINES - 1, 20, "Hunger: ++++++++++");//hunger bar
+        move(LINES - 1, 28); //move cursor to first +
+        attron(COLOR_PAIR(14));//green
         for (int i = 0; i < hunger; i++) {
             addch('+');
         }
         attroff(COLOR_PAIR(14));
 
-        show_room(y, x); 
-        continue_corridor(y, x, 0);
+        show_room(y, x);
+        //continue_corridor(y, x, 0);
         mvaddch(y, x, '@');
         refresh();
     }
 }
 
-#endif // GENERATE_MAP_H
+#endif //GENERATE_MAP_H

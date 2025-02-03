@@ -56,7 +56,6 @@ bool username_exists(const char *username) {
 }
 
 bool is_valid_email(const char *email) {
-    // Simple regex-like check for email format
     const char *at_sign = strchr(email, '@');
     if (!at_sign || at_sign == email || !strchr(at_sign, '.')) {
         return false;
@@ -93,7 +92,7 @@ void get_password(char *password) {
             i++;
         }
     }
-    password[i] = '0'; // Corrected to null-terminate the string
+    password[i] = '0'; 
 }
 
 void signup_menu() {
@@ -143,7 +142,6 @@ void signup_menu() {
         }
     }
 
-    // Save user info to the file
     FILE *fp = fopen(USER_FILE, "a");
     if (fp != NULL) {
         fprintf(fp, "%s %s\n", username, password);
@@ -202,7 +200,7 @@ int main() {
         printw("5. Exit \n ");
         printw("Choose an option: ");
         
-        choice = getch() - '0'; // Convert char to int
+        choice = getch() - '0'; 
         
         switch (choice) {
             case 1:
@@ -215,7 +213,6 @@ int main() {
                 signup_menu();
                 break;
             case 4:
-                // forgot_password_menu(); // Implement this function as needed
                 break;
             case 5:
                 endwin();

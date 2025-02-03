@@ -251,7 +251,7 @@ void nemidoonam() {
                 break;
 
             case '3':
-                endwin(); // End ncurses
+                endwin(); 
                 return;
 
             default:
@@ -261,5 +261,5 @@ void nemidoonam() {
         }
     }
 
-    endwin(); // End ncurses
+    endwin(); 
 }
