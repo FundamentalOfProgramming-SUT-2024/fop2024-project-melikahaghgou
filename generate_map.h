@@ -538,6 +538,49 @@ void weapon_menu() {
     refresh();
 }
 
+int isValidMove(char cell) {
+    if(cell == '@'){
+        mvprintw(0, 0, "Enter Password: ");
+        int temp, count = 0;
+        while(count < 3){
+            echo();
+            scanw("%d", &temp);
+            noecho();
+            if(temp == password){
+                mvprintw(2, 0, "Correct");
+                getch();
+                mvprintw(2, 0, "       ");
+                mvprintw(0, 16, "    ");
+                move(0, 16);
+            }
+            else{
+                if(count == 0){
+                    attron(COLOR_PAIR(17));
+                }
+                if(count == 1){
+                    attron(COLOR_PAIR(16));
+                }
+                if(count == 2){
+                    attron(COLOR_PAIR(15));
+                }
+                mvprintw(2, 0, "Wrong");
+                attroff(COLOR_PAIR(17));
+                attroff(COLOR_PAIR(15));
+                attroff(COLOR_PAIR(16));
+                getch();
+                mvprintw(2, 0, "     ");
+                count++;
+                mvprintw(0, 16, "    ");
+                move(0, 16);
+            }
+        }
+        getch();
+    }
+    return cell == '#' || cell == '.' || cell == '*' || cell == '$' || cell == '+' || cell == '&' || cell == 'd' || cell == 's' || cell == 'm' || cell == 'n' || cell == '!' || cell == '~' || cell == '%' || ('1' <= cell && cell <= '3');
+}
+
+int password = 0;
+
 void move_character() {
     int ch;
     int x = 5, y = 5;
@@ -553,7 +596,6 @@ void move_character() {
     create_password_doors();
     long int hunger_timer = time(NULL), password_time;
     int flag = 0;
-    int password = 0; // Ensure password is properly declared
     keypad(stdscr, TRUE);
 
     while ((ch = getch()) != 'q') {
@@ -562,81 +604,82 @@ void move_character() {
             hunger_timer = time(NULL);
         }
         int x_previous = x, y_previous = y;
+        
         switch (ch) {
-            case 'k':
-            case KEY_DOWN:
-                if (map[y + 1][x] == '#' || map[y + 1][x] == '.' || map[y + 1][x] == '*' || map[y + 1][x] == '$' || map[y + 1][x] == '+' || map[y + 1][x] == '&' || map[y + 1][x] == 'd' || map[y + 1][x] == 's' || map[y + 1][x] == 'm' || map[y + 1][x] == 'n' || map[y + 1][x] == '!' || map[y + 1][x] == '~' || map[y + 1][x] == '%' || ('1' <= map[y + 1][x] && map[y + 1][x] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    y++;
-                }
-                break;
-            case 'j':
-            case KEY_UP:
-                if (map[y - 1][x] == '#' || map[y - 1][x] == '.' || map[y - 1][x] == '*' || map[y - 1][x] == '$' || map[y - 1][x] == '+' || map[y - 1][x] == '&' || map[y - 1][x] == 'd' || map[y - 1][x] == 's' || map[y - 1][x] == 'm' || map[y - 1][x] == 'n' || map[y - 1][x] == '!' || map[y - 1][x] == '~' || map[y - 1][x] == '%' || ('1' <= map[y - 1][x] && map[y - 1][x] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    y--;
-                }
-                break;
-            case 'h':
-            case KEY_LEFT:
-                if (map[y][x - 1] == '#' || map[y][x - 1] == '.' || map[y][x - 1] == '*' || map[y][x - 1] == '$' || map[y][x - 1] == '+' || map[y][x - 1] == '&' || map[y][x - 1] == 'd' || map[y][x - 1] == 's' || map[y][x - 1] == 'm' || map[y][x - 1] == 'n' || map[y][x - 1] == '!' || map[y][x - 1] == '~' || map[y][x - 1] == '%' || ('1' <= map[y][x - 1] && map[y][x - 1] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    x--;
-                }
-                break;
-            case 'l':
-            case KEY_RIGHT:
-                if (map[y][x + 1] == '#' || map[y][x + 1] == '.' || map[y][x + 1] == '*' || map[y][x + 1] == '$' || map[y][x + 1] == '+' || map[y][x + 1] == '&' || map[y][x + 1] == 'd' || map[y][x + 1] == 's' || map[y][x + 1] == 'm' || map[y][x + 1] == 'n' || map[y][x + 1] == '!' || map[y][x + 1] == '~' || map[y][x + 1] == '%' || ('1' <= map[y][x + 1] && map[y][x + 1] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    x++;
-                }
-                break;
-            case 'b':
-                if (map[y + 1][x - 1] == '#' || map[y + 1][x - 1] == '.' || map[y + 1][x - 1] == '*' || map[y + 1][x - 1] == '$' || map[y + 1][x - 1] == '+' || map[y + 1][x - 1] == '&' || map[y + 1][x - 1] == 'd' || map[y + 1][x - 1] == 's' || map[y + 1][x - 1] == 'm' || map[y + 1][x - 1] == 'n' || map[y + 1][x - 1] == '!' || map[y + 1][x - 1] == '~' || map[y + 1][x - 1] == '%' || ('1' <= map[y + 1][x - 1] && map[y + 1][x - 1] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    y++;
-                    x--;
-                }
-                break;
-            case 'n':
-                if (map[y + 1][x + 1] == '#' || map[y + 1][x + 1] == '.' || map[y + 1][x + 1] == '*' || map[y + 1][x + 1] == '$' || map[y + 1][x + 1] == '+' || map[y + 1][x + 1] == '&' || map[y + 1][x + 1] == 'd' || map[y + 1][x + 1] == 's' || map[y + 1][x + 1] == 'm' || map[y + 1][x + 1] == 'n' || map[y + 1][x + 1] == '!' || map[y + 1][x + 1] == '~' || map[y + 1][x + 1] == '%' || ('1' <= map[y + 1][x + 1] && map[y + 1][x + 1] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    y++;
-                    x++;
-                }
-                break;
-            case 'u':
-                if (map[y - 1][x + 1] == '#' || map[y - 1][x + 1] == '.' || map[y - 1][x + 1] == '*' || map[y - 1][x + 1] == '$' || map[y - 1][x + 1] == '+' || map[y - 1][x + 1] == '&' || map[y - 1][x + 1] == 'd' || map[y - 1][x + 1] == 's' || map[y - 1][x + 1] == 'm' || map[y - 1][x + 1] == 'n' || map[y - 1][x + 1] == '!' || map[y - 1][x + 1] == '~' || map[y - 1][x + 1] == '%' || ('1' <= map[y - 1][x + 1] && map[y - 1][x + 1] <= '3')) {
-                    mvaddch(y, x, map[y][x]);
-                    y--;
-                    x++;
-                }
-                break;
-            case 'e':
-                food_menu();
-                break;
-            case 'i':
-                weapon_menu();
-                break;
-            case 'w':
-                if(weapon == 5){
-                    mvprintw(0, 0, "You Already Have No Weapon.");
-                    getch();
-                    mvprintw(0, 0, "                           ");
-                }
-                else{
-                    mvprintw(0, 0, "You Put %s Away.", weapon_names[weapon]);
-                    weapon = 5;
-                    getch();
-                    mvprintw(0, 0, "                           ");
-                }
-            break;
-            case 'z':
-                spell_menu();
-                break;
+    case 'k':
+    case KEY_DOWN:
+        if (isValidMove(map[y + 1][x])) {
+            mvaddch(y, x, map[y][x]);
+            y++;
+        }
+        break;
+    case 'j':
+    case KEY_UP:
+        if (isValidMove(map[y - 1][x])) {
+            mvaddch(y, x, map[y][x]);
+            y--;
+        }
+        break;
+    case 'h':
+    case KEY_LEFT:
+        if (isValidMove(map[y][x - 1])) {
+            mvaddch(y, x, map[y][x]);
+            x--;
+        }
+        break;
+    case 'l':
+    case KEY_RIGHT:
+        if (isValidMove(map[y][x + 1])) {
+            mvaddch(y, x, map[y][x]);
+            x++;
+        }
+        break;
+    case 'b':
+        if (isValidMove(map[y + 1][x - 1])) {
+            mvaddch(y, x, map[y][x]);
+            y++;
+            x--;
+        }
+        break;
+    case 'n':
+        if (isValidMove(map[y + 1][x + 1])) {
+            mvaddch(y, x, map[y][x]);
+            y++;
+            x++;
+        }
+        break;
+    case 'u':
+        if (isValidMove(map[y - 1][x + 1])) {
+            mvaddch(y, x, map[y][x]);
+            y--;
+            x++;
+        }
+        break;
+    case 'e':
+        food_menu();
+        break;
+    case 'i':
+        weapon_menu();
+        break;
+    case 'w':
+        if (weapon == 5) {
+            mvprintw(0, 0, "You Already Have No Weapon.");
+            getch();
+            mvprintw(0, 0, "                           ");
+        } else {
+            mvprintw(0, 0, "You Put %s Away.", weapon_names[weapon]);
+            weapon = 5;
+            getch();
+            mvprintw(0, 0, "                           ");
+        }
+        break;
+    case 'z':
+        spell_menu();
+        break;
     default:
         break;
 }
+
 
         if(map[y_previous][x_previous] == '*'){
             gold++;
